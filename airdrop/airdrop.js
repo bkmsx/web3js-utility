@@ -2,6 +2,7 @@
 var airdropABI = require("./airdrop_abi");
 var Tx = require("ethereumjs-tx");
 var Web3 = require("web3");
+var Account = require("./getAccount");
 web3 = new Web3(
   new Web3.providers.HttpProvider(
     "https://ropsten.infura.io/v3/75bdcbca0b894b1ebed5777a506bbfea"
@@ -15,7 +16,9 @@ var contractAddress = "0x3218AF7Ad910C5D8e1511114013a8674dB83A021";
 var nonce = web3.eth.getTransactionCount(publicKey);
 var contract = web3.eth.contract(airdropABI.contractAbi).at(contractAddress);
 
-// sendTokens(publicKey, privateKey, recipients, amounts);
+Account.getAccounts(function(recipients, amounts) {
+  sendTokens(publicKey, privateKey, recipients[0], amounts[0]);
+});
 
 function sendTokens(
   sender_publicKey,
@@ -34,7 +37,7 @@ function sendTokens(
     to: contractAddress,
     nonce: web3.toHex(nonce), // Nonce is the times the address has transacted, should always be higher than the last nonce 0x0#
     gasPrice: web3.toHex(90e9), // Normal is '0x14f46b0400' or 90 GWei
-    gasLimit: web3.toHex(200000), // Limit to be used by the transaction, default is '0x55f0' or 22000 GWei
+    gasLimit: web3.toHex(3000000), // Limit to be used by the transaction, default is '0x55f0' or 22000 GWei
     value: txValue, // The value we are sending '0x16345785d8a0000' which is 0.1 Ether
     data: txData,
     chainId: 3 // The data to be sent with transaction, '0x6f6820686169206d61726b' or 'oh hai mark'
