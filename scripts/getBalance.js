@@ -5,24 +5,27 @@ For an explanation of this code, navigate to the wiki https://github.com/ThatOth
 */
 
 // Require the web3 node module.
-var Web3 = require('web3');
+var Web3 = require("web3");
 
 // Show Web3 where it needs to look for a connection to Ethereum.
-web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/YOUR-API-TOKEN-HERE'));
+web3 = new Web3(
+  new Web3.providers.HttpProvider(
+    "https://ropsten.infura.io/v3/75bdcbca0b894b1ebed5777a506bbfea"
+  )
+);
 
 // Write to the console the script will run shortly.
-console.log('Getting Ethereum address info.....');
+console.log("Getting Ethereum address info.....");
 
 // Define the address to search witin.
-var addr = ('ETHEREUM-ADDRESS-HERE');
+var addr = "0x737522E8714FE572B03Ce15628bBccA7Acd80578";
 
 // Show the address in the console.
-console.log('Address:', addr);
+console.log("Address:", addr);
 
 // Use Wb3 to get the balance of the address, convert it and then show it in the console.
-web3.eth.getBalance(addr, function (error, result) {
-	if (!error)
-		console.log('Ether:', web3.utils.fromWei(result,'ether')); // Show the ether balance after converting it from Wei
-	else
-		console.log('Huston we have a promblem: ', error); // Should dump errors here
+web3.eth.getBalance(addr, function(error, result) {
+  if (!error) console.log("Ether:", web3.utils.fromWei(result, "ether"));
+  // Show the ether balance after converting it from Wei
+  else console.log("Huston we have a promblem: ", error); // Should dump errors here
 });
