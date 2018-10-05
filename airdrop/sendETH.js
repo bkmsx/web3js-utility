@@ -1,43 +1,51 @@
-// Add the web3 node module
-var airdropABI = require("./airdrop_abi");
-var Tx = require("ethereumjs-tx");
 var Web3 = require("web3");
-var Account = require("./getAccount");
+var fs = require("fs");
+var csv = require("fast-csv");
+
 web3 = new Web3(
   new Web3.providers.HttpProvider(
     "https://ropsten.infura.io/v3/75bdcbca0b894b1ebed5777a506bbfea"
   )
 );
 
+var Tx = require("ethereumjs-tx");
 var publicKey = "0x737522E8714FE572B03Ce15628bBccA7Acd80578";
 var privateKey =
   "5604b5334c686e4596cf64300ad7b1d74ea0915d14023c03b1bba882c64c8671";
-var contractAddress = "0x3218AF7Ad910C5D8e1511114013a8674dB83A021";
 var nonce = web3.eth.getTransactionCount(publicKey);
-var contract = web3.eth.contract(airdropABI.contractAbi).at(contractAddress);
 
-Account.getAccounts(function(recipients, amounts) {
-  sendTokens(publicKey, privateKey, recipients[0], amounts[0]);
+var stream = fs.createReadStream("accounts.csv");
+var csvStream = csv().on("data", function(data) {
+  console.log("Transaction " + nonce + " :");
+  console.log(data);
+  sendETH(publicKey, privateKey, data[0], data[2]);
+  nonce++;
 });
+stream.pipe(csvStream);
 
-function sendTokens(
+function sendETH(
   sender_publicKey,
   sender_privateKey,
   recipient_publicKey,
   amount
 ) {
   var privateKey = Buffer.from(sender_privateKey, "hex");
-  var receivingAddr = sender_publicKey;
-  var txValue = web3.toHex(web3.toWei("0", "ether"));
 
-  var txData = contract.airdropToken.getData(recipient_publicKey, amount);
+  // The reciviing address of the transaction
+  var receivingAddr = sender_publicKey;
+
+  // Value to be sent, converted to wei and then into a hex value
+  var txValue = web3.toHex(web3.toWei(amount, "ether"));
+
+  // Data to be sent in transaction, converted into a hex value. Normal tx's do not need this and use '0x' as default, but who wants to be normal?
+  var txData = "0x";
 
   var rawTx = {
     from: sender_publicKey,
-    to: contractAddress,
     nonce: web3.toHex(nonce), // Nonce is the times the address has transacted, should always be higher than the last nonce 0x0#
     gasPrice: web3.toHex(90e9), // Normal is '0x14f46b0400' or 90 GWei
-    gasLimit: web3.toHex(3000000), // Limit to be used by the transaction, default is '0x55f0' or 22000 GWei
+    gasLimit: web3.toHex(25000), // Limit to be used by the transaction, default is '0x55f0' or 22000 GWei
+    to: recipient_publicKey, // The receiving address of this transaction
     value: txValue, // The value we are sending '0x16345785d8a0000' which is 0.1 Ether
     data: txData,
     chainId: 3 // The data to be sent with transaction, '0x6f6820686169206d61726b' or 'oh hai mark'
@@ -60,3 +68,4 @@ function sendTokens(
     console.log(hash);
   });
 }
+// Used to sign the transaction. Obviously you SHOULD better secure this than just plain text

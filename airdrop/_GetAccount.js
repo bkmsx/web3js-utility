@@ -4,7 +4,7 @@ var csv = require("fast-csv");
 exports.getAccounts = function(callback) {
   var publicKeys = [];
   var amounts = [];
-  var stream = fs.createReadStream("accounts.csv");
+  var stream = fs.createReadStream("_accounts_tokens.csv");
 
   var index = 0;
   var groupKey = [];
